@@ -53,58 +53,58 @@ class MyUNet(nn.Module):
         self.te2 = self._make_te(time_emb_dim, 10)
         self.b2 = nn.Sequential(
             MyBlock((10, 14, 14), 10, 20),
-            MyBlock((20, 14, 14), 20, 20),
-            MyBlock((20, 14, 14), 20, 20)
+            MyBlock((20, 14, 14), 20, 40),
+            MyBlock((40, 14, 14), 40, 40)
         )
-        self.down2 = nn.Conv2d(20, 20, 4, 2, 1)
+        self.down2 = nn.Conv2d(40, 40, 4, 2, 1)
 
-        self.te3 = self._make_te(time_emb_dim, 20)
+        self.te3 = self._make_te(time_emb_dim, 40)
         self.b3 = nn.Sequential(
-            MyBlock((20, 7, 7), 20, 40),
-            MyBlock((40, 7, 7), 40, 40),
-            MyBlock((40, 7, 7), 40, 40)
+            MyBlock((40, 7, 7), 40, 80),
+            MyBlock((80, 7, 7), 80, 160),
+            MyBlock((160, 7, 7), 160, 160)
         )
         self.down3 = nn.Sequential(
-            nn.Conv2d(40, 40, 2, 1),
+            nn.Conv2d(160, 160, 2, 1),
             nn.SiLU(),
-            nn.Conv2d(40, 40, 4, 2, 1)
+            nn.Conv2d(160, 160, 4, 2, 1)
         )
 
         # Bottleneck
-        self.te_mid = self._make_te(time_emb_dim, 40)
+        self.te_mid = self._make_te(time_emb_dim, 160)
         self.b_mid = nn.Sequential(
-            MyBlock((40, 3, 3), 40, 20),
-            MyBlock((20, 3, 3), 20, 20),
-            MyBlock((20, 3, 3), 20, 40)
+            MyBlock((160, 3, 3), 160, 160),
+            MyBlock((160, 3, 3), 160, 160),
+            MyBlock((160, 3, 3), 160, 160)
         )
 
         # Second half
         self.up1 = nn.Sequential(
-            nn.ConvTranspose2d(40, 40, 4, 2, 1),
+            nn.ConvTranspose2d(160, 160, 4, 2, 1),
             nn.SiLU(),
-            nn.ConvTranspose2d(40, 40, 2, 1)
+            nn.ConvTranspose2d(160, 160, 2, 1)
         )
 
-        self.te4 = self._make_te(time_emb_dim, 80)
+        self.te4 = self._make_te(time_emb_dim, 320)
         self.b4 = nn.Sequential(
-            MyBlock((80, 7, 7), 80, 40),
-            MyBlock((40, 7, 7), 40, 20),
-            MyBlock((20, 7, 7), 20, 20)
+            MyBlock((320, 7, 7), 320, 160),
+            MyBlock((160, 7, 7), 160, 80),
+            MyBlock((80, 7, 7), 80, 80)
         )
 
-        self.up2 = nn.ConvTranspose2d(20, 20, 4, 2, 1)
-        self.te5 = self._make_te(time_emb_dim, 40)
+        self.up2 = nn.ConvTranspose2d(80, 40, 4, 2, 1)
+        self.te5 = self._make_te(time_emb_dim, 80)
         self.b5 = nn.Sequential(
+            MyBlock((80, 14, 14), 80, 40),
             MyBlock((40, 14, 14), 40, 20),
-            MyBlock((20, 14, 14), 20, 10),
-            MyBlock((10, 14, 14), 10, 10)
+            MyBlock((20, 14, 14), 20, 20)
         )
 
-        self.up3 = nn.ConvTranspose2d(10, 10, 4, 2, 1)
+        self.up3 = nn.ConvTranspose2d(20, 10, 4, 2, 1)
         self.te_out = self._make_te(time_emb_dim, 20)
         self.b_out = nn.Sequential(
+            MyBlock((20, 28, 28), 20, 20),
             MyBlock((20, 28, 28), 20, 10),
-            MyBlock((10, 28, 28), 10, 10),
             MyBlock((10, 28, 28), 10, 10, normalize=False)
         )
 
@@ -114,20 +114,20 @@ class MyUNet(nn.Module):
         # x is (N, 2, 28, 28) (image with positional embedding stacked on channel dimension)
         t = self.time_embed(t)
         n = len(x)
-        out1 = self.b1(x + self.te1(t).reshape(n, -1, 1, 1))  # (N, 10, 28, 28)
-        out2 = self.b2(self.down1(out1) + self.te2(t).reshape(n, -1, 1, 1))  # (N, 20, 14, 14)
-        out3 = self.b3(self.down2(out2) + self.te3(t).reshape(n, -1, 1, 1))  # (N, 40, 7, 7)
+        out1 = self.b1(x + self.te1(t).reshape(n, -1, 1, 1))  
+        out2 = self.b2(self.down1(out1) + self.te2(t).reshape(n, -1, 1, 1))
+        out3 = self.b3(self.down2(out2) + self.te3(t).reshape(n, -1, 1, 1))
 
-        out_mid = self.b_mid(self.down3(out3) + self.te_mid(t).reshape(n, -1, 1, 1))  # (N, 40, 3, 3)
+        out_mid = self.b_mid(self.down3(out3) + self.te_mid(t).reshape(n, -1, 1, 1))
 
-        out4 = torch.cat((out3, self.up1(out_mid)), dim=1)  # (N, 80, 7, 7)
-        out4 = self.b4(out4 + self.te4(t).reshape(n, -1, 1, 1))  # (N, 20, 7, 7)
+        out4 = torch.cat((out3, self.up1(out_mid)), dim=1)
+        out4 = self.b4(out4 + self.te4(t).reshape(n, -1, 1, 1))
 
-        out5 = torch.cat((out2, self.up2(out4)), dim=1)  # (N, 40, 14, 14)
-        out5 = self.b5(out5 + self.te5(t).reshape(n, -1, 1, 1))  # (N, 10, 14, 14)
+        out5 = torch.cat((out2, self.up2(out4)), dim=1)
+        out5 = self.b5(out5 + self.te5(t).reshape(n, -1, 1, 1))
 
-        out = torch.cat((out1, self.up3(out5)), dim=1)  # (N, 20, 28, 28)
-        out = self.b_out(out + self.te_out(t).reshape(n, -1, 1, 1))  # (N, 1, 28, 28)
+        out = torch.cat((out1, self.up3(out5)), dim=1)
+        out = self.b_out(out + self.te_out(t).reshape(n, -1, 1, 1))
 
         out = self.conv_out(out)
 

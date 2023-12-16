@@ -352,7 +352,7 @@ if __name__ == "__main__":
     
     if config.experiment_name == "score":
         print("Launch the score matching experiment")
-        num_epochs = 100
+        total_iteration = 50000
         sampling_number = 100
         only_final = True
         # epsilon of step size
@@ -361,25 +361,24 @@ if __name__ == "__main__":
         sigma_min = 0.005
         sigma_max = 10
         # Langevin step size and Annealed size
-        n_steps = 10
+        n_steps = 100
         annealed_step = 100
 
         network = MyUNet(n_steps=n_steps)
         model = Score_Model(network, device, n_steps, sigma_min, sigma_max)
-        optim = torch.optim.Adam(model.parameters(), lr = 0.005)
-        training_loop_score(model, dataloader, optim, num_epochs, device)
+        optim = torch.optim.Adam(model.parameters(), lr = learning_rate)
+        training_loop_score(model, dataloader, optim, total_iteration, device)
         samplingMethod = AnnealedLangevinDynamic(sigma_min, sigma_max, n_steps, annealed_step, model, device, eps=eps)
         samples = samplingMethod.sampling(sampling_number, only_final)
         show_images(samples, "ScoreBased Model", pixel=28)
 
     if config.experiment_name == 'sde':
-        dataset = MNIST('.', train=True, transform=transforms.ToTensor(), download=True)
-        dataloader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
+
         marginal_prob_std_fn = functools.partial(marginal_prob_std, sigma=25.0)
         diffusion_coeff_fn = functools.partial(diffusion_coeff, sigma=25)
         sde_model = torch.nn.DataParallel(Score_SDE_Model(marginal_prob_std=marginal_prob_std_fn))
         sde_model = sde_model.to(device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+        optimizer = torch.optim.Adam(model.parameters(), lr = learning_rate)
         training_loop_sde(sde_model,dataloader,optimizer,50,device)
         samples = pc_sampler(sde_model,marginal_prob_std_fn,diffusion_coeff_fn,batch_size=64,num_steps=500,snr=0.16,device='cuda',eps=1e-3)
         show_images(samples, title="Score_SDE")

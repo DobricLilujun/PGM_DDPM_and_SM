@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import math
-# from score.score_blocks import CondRefineNetDilated
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -19,7 +18,6 @@ class Score_Model(nn.Module):
         super().__init__()
         self.device = device
         self.sigmas = torch.exp(torch.linspace(start=math.log(sigma_max), end=math.log(sigma_min), steps = n_steps)).to(device = device)
-        # self.conv_layer = CondRefineNetDilated(device, n_steps)
         self.conv_layer = network
         self.to(device = device)
 
