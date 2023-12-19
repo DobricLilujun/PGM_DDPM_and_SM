@@ -38,8 +38,7 @@ Following the idea of [], we construct a Noise Conditional Score Networks and ap
 
 ## References
 
+* A Connection Between Score Matching and Denoising Autoencoders, https://www.iro.umontreal.ca/~vincentp/Publications/smdae_techreport.pdf
 * Denoising Diffusion Probabilistic Models, https://arxiv.org/abs/2006.11239
 * Cold Diffusion: Inverting Arbitrary Image Transforms Without Noise,https://arxiv.org/abs/2208.09392
 * Generative Modeling by Estimating Gradients of the Data Distribution,https://yang-song.net/blog/2021/score/
-* Code of Noise Conditional Score Networks, https://github.com/ermongroup/ncsn/
-
