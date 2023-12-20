@@ -2,6 +2,7 @@
 
 - We conducted a series of experiments on the MNIST dataset, including  ddpm and conditional ddpm, as well as cold diffusion and score based model.
 - You can run the main.py with command("ddpm/ddpm_conditional/cold_median/cold_kernel/cold_resolution/score") to see our results of experiments.
+- You can see the eval_score_matching.ipynb for the calculation of the energy function with score matching to evaluate the results of all the experiments above.
 
 ## DDPM and DDPM Condtional
 
