@@ -16,7 +16,9 @@ class MedianBlur(nn.Module):
         self.kernel_size = kernel_size
 
     def forward_process(self, x, t_tensor):
-        # The forward process, we add median blur for the input image
+        # The forward process, we add median blur for the input image.
+        # The time here represents the number of times we added blur.
+
         res = torch.zeros_like(x)
         for i in range(x.shape[0]):
             res_numpy = x[i].squeeze().cpu().numpy()
@@ -53,6 +55,7 @@ class ConvolutionBlur(nn.Module):
 
     def forward_process(self, x, t_tensor):
         # The forward process, we add blur for the input image
+        # The time here represents the number of times we added blur.
         res = torch.zeros_like(x)
         for i in range(x.shape[0]):
             res_numpy = x[i].squeeze().cpu().numpy()
@@ -88,6 +91,7 @@ class SuperResolution(nn.Module):
 
     def forward_process(self, x, t_tensor):
         # The forward process
+        # The time here represents the radiu of the operator.
         res = torch.zeros_like(x)
         for i in range(x.shape[0]):
             res_numpy = x[i].squeeze().cpu().numpy().astype(np.uint8)

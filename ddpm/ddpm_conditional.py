@@ -5,6 +5,7 @@ from ddpm.ddpm import DDPM
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class DDPM_conditional(DDPM):
+    # For the conditional version, we just add a label embedding in the reverse process
 
     def __init__(self, network, num_timesteps, beta_start=0.0001, beta_end=0.02, device=device) -> None:
         super().__init__(network, num_timesteps)

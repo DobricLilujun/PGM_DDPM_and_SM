@@ -7,14 +7,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class Score_Model(nn.Module):
     def __init__(self, network, device, n_steps, sigma_min, sigma_max):
-        '''
-        Score Network.
-
-        n_steps   : perturbation schedule steps (Langevin Dynamic step)
-        sigma_min : sigma min of perturbation schedule
-        sigma_min : sigma max of perturbation schedule
-
-        '''
+        # n_steps: perturbation schedule steps (Langevin Dynamic step)
+        # sigma_min: sigma min of perturbation schedule
+        # sigma_min: sigma max of perturbation schedule
         super().__init__()
         self.device = device
         self.sigmas = torch.exp(torch.linspace(start=math.log(sigma_max), end=math.log(sigma_min), steps = n_steps)).to(device = device)
@@ -23,13 +18,10 @@ class Score_Model(nn.Module):
 
     # Loss Function
     def loss_fn(self, x, idx=None):
-        '''
-        This function performed when only training phase.
 
-        x          : real data if idx==None else perturbation data
-        idx        : if None (training phase), we perturbed random index. Else (inference phase), it is recommended that you specify.
+        # x: real data if idx==None else perturbation data
+        # idx: if None (training phase), we perturbed random index. Else (inference phase), it is recommended that you specify.
 
-        '''
         scores, target, sigma = self.forward(x, idx=idx, get_target=True)
         target = target.view(target.shape[0], -1)
         scores = scores.view(scores.shape[0], -1)        
@@ -38,12 +30,6 @@ class Score_Model(nn.Module):
 
     # S(theta, sigma)
     def forward(self, x, idx=None, get_target=False):
-        '''
-        x          : real data if idx==None else perturbation data
-        idx        : if None (training phase), we perturbed random index. Else (inference phase), it is recommended that you specify.
-        get_target : if True (training phase), target and sigma is returned with output (score prediction)
-
-        '''
 
         if idx == None:
             idx = torch.randint(0, len(self.sigmas), (x.size(0), 1)).to(device = self.device)

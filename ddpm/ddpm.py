@@ -17,6 +17,7 @@ class DDPM(nn.Module):
 
     def add_noise(self, x_start, x_noise, timesteps):
         # The forward process
+        # We add the gaussian noise
 
         sqrt_alphas_cumprod = self.alphas_cumprod ** 0.5
         sqrt_one_minus_alphas_cumprod = (1 - self.alphas_cumprod) ** 0.5
@@ -34,6 +35,7 @@ class DDPM(nn.Module):
         return self.network.forward(x, t)
 
     def reconstruct_x0(self, x_t, t, noise):
+        # We reconstruct the origin image with the noise predicted
 
         s1 = torch.sqrt(1 / self.alphas_cumprod)[t].to(device)
         s2 = torch.sqrt(1 / self.alphas_cumprod - 1)[t].to(device)
@@ -43,6 +45,8 @@ class DDPM(nn.Module):
         return s1 * x_t - s2 * noise
 
     def q_posterior(self, x_0, x_t, t):
+        # The equiation (7) in the DDPM paper
+        # To calculate the mean posterior of the x_{t-1}|x_{t}， x_{0}
 
         posterior_mean_coef1 = (self.betas * torch.sqrt(self.alphas_cumprod_prev) / (1. - self.alphas_cumprod)).to(device)
         posterior_mean_coef2= ((1. - self.alphas_cumprod_prev) * torch.sqrt(self.alphas) / (1. - self.alphas_cumprod)).to(device)
@@ -55,6 +59,8 @@ class DDPM(nn.Module):
         return mu
 
     def get_variance(self, t):
+        # The equiation (7) in the DDPM paper
+        # To calculate the posterior coefficient of the covariance matrix of the x_{t-1}|x_{t}， x_{0}
 
         if t == 0:
             return 0
@@ -65,6 +71,7 @@ class DDPM(nn.Module):
         return variance
 
     def step(self, model_output, timestep, sample):
+        # reverse step x_{t}->x_{t-1}
         
         t = timestep
         pred_original_sample = self.reconstruct_x0(sample, t, model_output).to(device)
