@@ -50,6 +50,7 @@ def training_loop(model, dataloader, optimizer, num_epochs, num_timesteps, devic
         progress_bar.close()
 
 def training_loop_conditional(model, dataloader, optimizer, num_epochs, num_timesteps, nb_classes=10, device=device):
+    """Training loop for DDPM version conditional"""
     global_step = 0
     losses = []
     
@@ -107,6 +108,7 @@ def training_loop_cold(model, dataloader, optimizer, num_epochs, num_timesteps, 
         progress_bar.close()
 
 def training_loop_score(model, dataloader, optimizer, num_epochs, device=device):
+    """Training loop for score matching"""
 
     global_step = 0
     losses = []
@@ -156,6 +158,7 @@ def generate_image(ddpm, sample_size, channel, height, width):
     return frames, frames_mid
 
 def generate_image_conditional(ddpm, labels, sample_size, channel, height, width):
+    """Generate the image for the version conditional"""
 
     frames = []
     frames_mid = []
@@ -179,7 +182,7 @@ def generate_image_conditional(ddpm, labels, sample_size, channel, height, width
     return frames, frames_mid
 
 def generate_image_cold(model, images, algoindex):
-    """Generate the image from the final blured image"""
+    """Generate the image from the final blured image for cold diffusion"""
 
     frames = []
     sample_size = images.shape[0]

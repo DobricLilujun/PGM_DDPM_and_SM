@@ -32,7 +32,8 @@ class MyBlock(nn.Module):
     
 
 class MyUNet(nn.Module):
-  # Here is a network with 3 down and 3 up with the MyBlock
+    # Here is a network with 3 down and 3 up with the MyBlock
+    # You can see a graphical explanation in the appendix of our report
     def __init__(self, n_steps=1000, time_emb_dim=100):
         super().__init__()
 

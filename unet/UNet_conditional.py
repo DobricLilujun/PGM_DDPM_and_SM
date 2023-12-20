@@ -7,6 +7,7 @@ from unet.UNet import MyUNet
 class UNet_conditional(MyUNet):
 
     # In the base of our U-Net, we only add a embedding for label
+    # We add label embedding directly with the time embedding, so all the part in the network have the information about the label
     
     def __init__(self, n_steps=1000, time_emb_dim=100, nb_classes=None):
         super().__init__(n_steps, time_emb_dim)
